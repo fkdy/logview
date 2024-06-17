@@ -95,8 +95,8 @@ class LogView(LogUi):
             self.plotter.append(
                 LogDevPlotter(
                     self.dev.get_simd(saIdx, wgpIdx-1, cuIdx-1, simdIdx-1),))
-        self.plt_thread.append(threading.Thread(
-            target=self.plot, args=(len(self.plotter)-1,)))
+        #self.plt_thread.append(threading.Thread(
+        #    target=self.plot, args=(len(self.plotter)-1,)))
         #self.plt_thread[-1].start()
         # display figures
         self.plotter[-1].show()
@@ -115,7 +115,7 @@ class LogView(LogUi):
                 logger.debug(c)
                 self.dev.run(c)
                 # pause by PLAYING_DELAY ms
-                sleep(PLAYING_DELAY/1000)
+                #sleep(PLAYING_DELAY/1000)
             # stop the loop
             if stop():
                 logger.debug('stop running parser')

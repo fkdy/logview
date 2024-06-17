@@ -103,62 +103,32 @@ class LogParser(LogFiles):
         # when we get to the end of the simulation log, we enqueue a end of
         # command string to indicate the end of simulation
 
-        # update log strings
-        #
-        # update simulation log first. we need to check simulation status.
-        self._append_sim()
-        self._append_alloc()
-        self._append_done()
-
         cmd_list = []
-        self.alloc_str, cmd = self._parse_act(self.alloc_str)
-        # logger.debug(f'alloc str: {repr(self.alloc_str)},\ncmd: {cmd}')
+        # update simulation log first. we need to check simulation status.
+        self.sim_str, end_cmd = self._parse_end(self.sim_str)
+        self.alloc_str, cmd = self._parse_lines(self.alloc_str, self.alloc_lines)
         cmd_list.extend(cmd)
-        self.done_str, cmd = self._parse_act(self.done_str)
-        # logger.debug(f'done str: {repr(self.done_str)},\ncmd: {cmd}')
+        self.done_str, cmd = self._parse_lines(self.done_str, self.done_lines)
         cmd_list.extend(cmd)
-        self.sim_str, cmd = self._parse_end(self.sim_str)
-        # logger.debug(f'end str: {repr(self.sim_str)},\ncmd: {cmd}')
-        if cmd == self.end_str:
+
+        if end_cmd == self.end_str:
             self.log_busy = False
         # return time sorted list
-        #logger.debug(f'{cmd_list}')
+        # logger.debug(f'{cmd_list}')
         cmd_list.sort(key=lambda act: int(act['time']),)
-        #logger.debug(f'{cmd_list}')
+        # logger.debug(f'{cmd_list}')
         return cmd_list
 
-    def _get_str(self, line, gen):
-        '''get strings from log. save it to lines'''
-        for tmp in gen:
-            if not tmp:
+    def _parse_lines(self, line, gen,):
+        cmd_list = []
+        for s in gen:
+            if not s:
                 break
             else:
-                line = line + tmp
-        #for tmp in gen:
-        #    if FAST:
-        #        if not tmp:
-        #            break
-        #        else:
-        #            line = line + tmp
-        #    else:
-        #        line = line + tmp
-        #        break
-        return line
-
-    def _append_alloc(self,):
-        '''append log to alloc_lines'''
-        self.alloc_str = self._get_str(self.alloc_str, self.alloc_lines)
-        # logger.debug(f'get alloc str. {self.alloc_str}')
-
-    def _append_done(self,):
-        '''append log to done_lines'''
-        self.done_str = self._get_str(self.done_str, self.done_lines)
-        # logger.debug(f'get done str. {self.done_str}')
-
-    def _append_sim(self,):
-        '''append log to sim_lines'''
-        self.sim_str = self._get_str(self.sim_str, self.sim_lines)
-        # logger.debug(f'get sim str. {self.sim_str}')
+                line = line + s
+                line, cmd = self._parse_act(line)
+                cmd_list.extend(cmd)
+        return (line, cmd_list)
 
     def _parse_act(self, log_str: str) -> (str, list):
         '''parse actions from log strings'''
