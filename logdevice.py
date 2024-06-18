@@ -94,10 +94,10 @@ class Dev:
                     funcAction(act, argDb)
 
     def add_res(self, res_name: str, func_action: callable,
-                max_res: int, data=None):
+                max_res: int, data=None, color='b'):
         '''add resource item to res_map'''
         db = Database(f'{self.name}.{res_name}', [0,], [0,], ['dbg_id',],
-                      ymax=max_res, data=data)
+                      ymax=max_res, data=data, color=color)
         self.res_map[res_name] = (func_action, db)
         if func_action is not None:
             self.res.append(db)
@@ -162,10 +162,10 @@ class Simd32(Dev):
         # resource_name: (funcAction, database,)
         wv_num = 16
         wv_data = [False] * wv_num
-        self.add_res('wv_id', self.wvAction, wv_num, wv_data)
+        self.add_res('wv_id', self.wvAction, wv_num, wv_data, color='r')
         # TODO: add resource data
-        self.add_res('vgpr_size', self.vgprAction, 64,)
-        self.add_res('useer_accum_cntrb', self.useraccumAction, 100,)
+        self.add_res('vgpr_size', self.vgprAction, 64, color='g')
+        self.add_res('useer_accum_cntrb', self.useraccumAction, 100, color='b')
 
     def wvAction(self, act: dict, db: Database):
         '''command parsing function for wv_id resource'''

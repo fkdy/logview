@@ -8,7 +8,8 @@ class Database:
     '''object to save line infor'''
     def __init__(self, name: str, xs: list = [],
                  ys: list = [], yann: list = [],
-                 ymax=100, data=None):
+                 ymax=100, data=None,
+                 color: str = 'b'):
         # label
         self.lab = name
         self.xs = xs
@@ -18,6 +19,7 @@ class Database:
         # annotation
         self.ys_anno = yann
         self.data = data
+        self.color = color
         for y in self.ys:
             self.ys_norm.append(y / self.ymax)
         logger.debug(f'x: {self.xs}')
@@ -78,6 +80,10 @@ class Database:
     def get_label(self,):
         '''get name of the database'''
         return self.lab
+
+    def get_color(self,):
+        '''get color of the database'''
+        return self.color
 
     def get_samples(self,):
         '''get line data.'''

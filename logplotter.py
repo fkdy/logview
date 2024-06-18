@@ -33,10 +33,12 @@ class Line:
         self.ax.clear()
         # self.ax.set_title(f'{self.db.get_rn()}')
         self.ax.grid(True, linestyle='-.')
-        self.ax.plot(xs, ys, 'o-', label=self.db.get_rn())
+        self.ax.plot(
+            xs, ys, 'o-', label=self.db.get_rn(), color=self.db.get_color())
         for x, y, t in zip(xs, ys, ys_anno):
-            self.ax.annotate(t, xy=(x, y), xycoords='data',
-                             xytext=(1.5, 1.5), textcoords='offset points')
+            anno = self.ax.annotate(t, xy=(x, y), xycoords='data',
+                                    xytext=(1.5, 1.5), textcoords='offset points')
+            anno.set_visible(False)
         self.ax.legend()
 
 
