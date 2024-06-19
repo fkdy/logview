@@ -4,6 +4,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.ticker import FixedLocator
 from matplotlib.widgets import Button
+import numpy as np
 from logcommon import Database
 from logdevice import Dev
 import logging
@@ -42,9 +43,13 @@ class Line:
         self.ax.yaxis.set_major_locator(self.major_locator)
         self.ax.plot(
             xs, ys, 'o-', label=self.db.get_rn(), color=self.db.get_color())
+        self.ax.fill_between(np.array(xs), 0, np.array(ys),
+                             label=self.db.get_rn(),
+                             hatch='o',  # animated=True,
+                             color=self.db.get_color())
         for x, y, t in zip(xs, ys, ys_anno):
             anno = self.ax.annotate(t, xy=(x, y), xycoords='data',
-                                    xytext=(1.5, 1.5), animated=True,
+                                    xytext=(1.5, 1.5),
                                     textcoords='offset points')
             anno.set_visible(False)
         self.ax.legend(loc='upper left',)
