@@ -3,6 +3,7 @@ import matplotlib.animation as animation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.ticker import FixedLocator
+from matplotlib.widgets import Button
 from logcommon import Database
 from logdevice import Dev
 import logging
@@ -43,7 +44,7 @@ class Line:
             xs, ys, 'o-', label=self.db.get_rn(), color=self.db.get_color())
         for x, y, t in zip(xs, ys, ys_anno):
             anno = self.ax.annotate(t, xy=(x, y), xycoords='data',
-                                    xytext=(1.5, 1.5),
+                                    xytext=(1.5, 1.5), animated=True,
                                     textcoords='offset points')
             anno.set_visible(False)
         self.ax.legend(loc='upper left',)
@@ -100,6 +101,13 @@ class LogDevPlotter:
             # if idx != self.sub_num - 1:
             #     ax.tick_params(labelbottom=False)
             self.lines.append(Line(ax, db))
+        self.ax_resume = self.fig.add_axes([0.7, 0.9, 0.1, 0.075])
+        self.ax_pause = self.fig.add_axes([0.81, 0.9, 0.1, 0.075])
+        self.b_resume = Button(self.ax_resume, 'Resume')
+        self.b_paues = Button(self.ax_pause, 'Pause')
+        self.b_resume.on_clicked(self.resumeAnimation)
+        self.b_paues.on_clicked(self.pauseAnimation)
+        self.paused = False
 
         self.ani = animation.FuncAnimation(
             self.fig, self.update, interval=update_intvl)
@@ -124,3 +132,15 @@ class LogDevPlotter:
     def close(self,):
         '''close figure'''
         plt.close(self.fig)
+
+    def pauseAnimation(self, event):
+        '''pause animation'''
+        if not self.paused:
+            self.ani.pause()
+            self.paused = True
+
+    def resumeAnimation(self, event):
+        '''resume animation'''
+        if self.paused:
+            self.ani.resume()
+            self.paused = False
