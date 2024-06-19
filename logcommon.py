@@ -92,3 +92,6 @@ class Database:
     def get_last_sample(self,):
         '''get the last data'''
         return (self.xs[-1], self.ys[-1])
+
+    def get_ymax(self,):
+        return self.ymax

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.ticker import FixedLocator
 from logcommon import Database
 from logdevice import Dev
 import logging
@@ -24,6 +25,10 @@ class Line:
         '''register to ax in fig'''
         self.ax = ax
         self.db = db
+        self.major_locator = FixedLocator(
+            [self.db.get_ymax()/4, self.db.get_ymax()/2,
+             self.db.get_ymax()/4*3, self.db.get_ymax(),])
+        self.ax.xaxis.set_major_locator(self.major_locator)
 
     def update(self, i):
         '''using device data to update axes'''
@@ -33,13 +38,15 @@ class Line:
         self.ax.clear()
         # self.ax.set_title(f'{self.db.get_rn()}')
         self.ax.grid(True, linestyle='-.')
+        self.ax.yaxis.set_major_locator(self.major_locator)
         self.ax.plot(
             xs, ys, 'o-', label=self.db.get_rn(), color=self.db.get_color())
         for x, y, t in zip(xs, ys, ys_anno):
             anno = self.ax.annotate(t, xy=(x, y), xycoords='data',
-                                    xytext=(1.5, 1.5), textcoords='offset points')
+                                    xytext=(1.5, 1.5),
+                                    textcoords='offset points')
             anno.set_visible(False)
-        self.ax.legend()
+        self.ax.legend(loc='upper left',)
 
 
 class LogPlotter:
