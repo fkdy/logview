@@ -41,18 +41,34 @@ class Line:
         # self.ax.set_title(f'{self.db.get_rn()}')
         self.ax.grid(True, linestyle='-.')
         self.ax.yaxis.set_major_locator(self.major_locator)
-        self.ax.plot(
+        self.l2d = self.ax.plot(
             xs, ys, 'o-', label=self.db.get_rn(), color=self.db.get_color())
         self.ax.fill_between(np.array(xs), 0, np.array(ys),
                              label=self.db.get_rn(),
                              hatch='o',  # animated=True,
                              color=self.db.get_color())
-        for x, y, t in zip(xs, ys, ys_anno):
-            anno = self.ax.annotate(t, xy=(x, y), xycoords='data',
-                                    xytext=(1.5, 1.5),
-                                    textcoords='offset points')
-            anno.set_visible(False)
+        self.anno = self.ax.annotate(text='',
+                                     xy=(0, 0),
+                                     xycoords='data',
+                                     xytext=(10, 10),
+                                     textcoords='offset points',
+                                     #bbox={'boxstyle': 'round', 'fc': 'w'},
+                                     arrowprops={'arrowstyle': '->'},)
+        self.anno.set_visible(False)
         self.ax.legend(loc='upper left',)
+
+    def get_line(self,):
+        '''get line'''
+        return self.l2d
+
+    def get_sample(self, i):
+        '''get sample value in the line'''
+        xs, ys, ys_anno, lab = self.db.get_samples()
+        return (xs[i], ys[i])
+
+    def get_anno(self,):
+        '''get ax annotation'''
+        return self.anno
 
 
 class LogPlotter:
@@ -115,7 +131,8 @@ class LogDevPlotter:
         self.paused = False
 
         self.ani = animation.FuncAnimation(
-            self.fig, self.update, interval=update_intvl)
+            self.fig, self.update, interval=update_intvl, frames=5000000)
+        self.fig.canvas.mpl_connect('motion_notify_event', self.mhover)
 
     def update(self, i):
         '''update axes of this device'''
@@ -149,3 +166,31 @@ class LogDevPlotter:
         if self.paused:
             self.ani.resume()
             self.paused = False
+
+    def mhover(self, event):
+        '''hover function for mpl_connect'''
+        # get axes index
+        #
+        # get line
+        if event.inaxes is not None:
+            for idx, ax in enumerate(self.axes):
+                if event.inaxes == ax:
+                    break
+            logger.info(f'{idx}: {ax}')
+            # logger.info(self.lines[idx].get_line()[-1])
+            l2d = self.lines[idx].get_line()[-1]
+            l2d.set_pickradius(3)
+            anno = self.lines[idx].get_anno()
+            # l2d.contains returns (contains, pointlist)
+            ctd, pl = l2d.contains(event)
+            if ctd and anno.get_visible() is False:
+                logger.info(f"pl: {pl['ind'][0]}")
+                x, y = self.lines[idx].get_sample(pl['ind'][0])
+                logger.info(f"pl: {pl['ind'][0]}, data: ({x}, {y})")
+                anno.xy = (x, y)
+                anno.set_text(f'val: {y} @ {x}ps')
+                anno.set_visible(True)
+                self.fig.canvas.draw_idle()
+            elif anno.get_visible():
+                anno.set_visible(False)
+                self.fig.canvas.draw_idle()
